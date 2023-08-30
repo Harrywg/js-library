@@ -1,47 +1,34 @@
-import { createEl, duplicateEl, render } from "./library.js";
-
-// const data = ["item1", "item2", "item3", "item4", "item5"];
-
-// const main = createEl("main");
-// const header = createEl("header", main);
-
-// const titleH1 = createEl("h1", header);
-// titleH1.setEl((title) => {
-//   title.innerText = "This is my title";
-// });
-
-// const list = createEl("ul", main);
-// const listItem = createEl("li", null);
-
-// const listItems = duplicateEl(listItem, data.length, (listItem, i, array) => {
-//   listItem.id = `item-${i + 1}`;
-//   listItem.class = `list-item`;
-//   listItem.innerText = data[i];
-//   return listItem;
-// });
-
-// list.setChildren((prevChildren) => {
-//   return [...prevChildren, ...listItems];
-// });
-
-// render();
+import { createEl } from "./library.js";
 
 const header = createEl("header");
 
 const title = createEl("h1", header);
-title.setEl((title) => {
-  title.innerText = "Welcome to my website :)";
-});
+title.setEl((h1) => (h1.innerText = "This is my title"));
+
+const nav = createEl("nav", header);
 
 const main = createEl("main");
-
-const button = createEl("button", main);
-button.setEl((button) => {
-  button.innerText = "I am a button";
-  button.onclick = () => {
-    console.log("click");
-  };
-  console.dir(button);
+const mainIntro = createEl("section", main);
+const mainIntroP1 = createEl("p", mainIntro);
+mainIntroP1.setEl((p) => {
+  p.innerText = `Lorem ipsum, dolor sit amet consectetur adipisicing elit. Praesentium
+suscipit delectus explicabo vitae veritatis dignissimos. Repudiandae
+dolorum enim eligendi modi fugiat vero laudantium! Sapiente, minima. Quod
+vitae reprehenderit alias blanditiis? `;
 });
 
-render();
+const mouseElement = createEl("div");
+
+mouseElement.setEl((div) => {
+  div.id = "mouse-element";
+  div.style.background = `red`;
+  div.style.height = `100px`;
+});
+
+document.addEventListener("mousemove", (e) => {
+  mouseElement.setEl((div) => {
+    div.style.height = `${e.clientX / 2}px`;
+  });
+});
+
+const footer = createEl("footer");
