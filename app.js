@@ -1,45 +1,35 @@
 import { createEl } from "./library.js";
+import hljs from "./highlight/highlight.min.js";
 
-const createHeader = () => {
+import createIntro from "./components/Intro.js";
+import createDocs from "./components/Docs.js";
+
+function createHeader() {
   const header = createEl("header");
-  const title = createEl("h1", header);
-  title.setEl((h1) => {
-    h1.innerText = "Pokemon Search";
+  header.setEvent("onscroll", () => {
+    console.log("scroll");
   });
-};
+  createEl("h1", header, "Create.js");
 
-createHeader();
+  document.addEventListener("scroll", (e) => {
+    const headerEl = document.getElementsByTagName("header")[0];
+    const yPos = headerEl.getBoundingClientRect().y;
+    if (yPos === 0) {
+      headerEl.classList = "header-stuck";
+    } else headerEl.classList = "";
+  });
 
-const createMain = () => {
+  return header;
+}
+
+function createMain() {
   const main = createEl("main");
-  const cardList = createCardList(main);
-};
+  const introSection = createIntro(main);
+  const docSection = createDocs(main);
+  return main;
+}
 
-const createCardList = (main) => {
-  const cardList = createEl("div", main);
-  cardList.setEl((div) => (div.id = "card-list"));
-  fetch("https://pokeapi.co/api/v2/pokemon")
-    .then((res) => {
-      return res.json();
-    })
-    .then(({ results }) => {
-      results.map((pokemon) => createCard(cardList, pokemon));
-    });
-};
+const header = createHeader();
+const main = createMain();
 
-const createCard = (cardList, pokemon) => {
-  const card = createEl("div", cardList);
-  card.setEl((div) => (div.className = "card"));
-  const cardImg = createEl("img", card);
-  const cardP = createEl("p", card);
-  fetch(pokemon.url)
-    .then((res) => {
-      return res.json();
-    })
-    .then((pokeData) => {
-      cardP.setEl((p) => (p.innerText = pokemon.name));
-      cardImg.setEl((img) => (img.src = pokeData.sprites.front_default));
-    });
-};
-
-createMain();
+hljs.highlightAll();

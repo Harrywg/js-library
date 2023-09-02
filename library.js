@@ -1,85 +1,101 @@
-export const createEl = (tag, parent = virtualRoot) => {
+export const createEl = (tag, parent = virtualRoot, setInput, setEvents) => {
+  //creates virtual element with methods to safely manipulate data while updating DOM automatically
+
+  let elementObject = new Object();
+
   const el = document.createElement(tag);
-  const events = {};
+  elementObject.el = el;
+
+  let events = {};
   let children = [];
-  const setEl = (func) => {
-    if (func) func(el);
+
+  elementObject.setEl = (input, setEvents) => {
+    elementObject.el = el;
+    children = [];
+    if (setEvents) events = setEvents;
+    if (typeof input === "function") elementObject.el = input(el);
+    else elementObject.el.innerText = input;
     render();
   };
 
-  const setEvent = (eventName, func) => {
+  elementObject.setEvent = (eventName, func) => {
     events[eventName] = func;
     render();
   };
 
-  const getEvents = () => {
+  elementObject.getEvents = () => {
     return { ...events };
   };
 
-  const removeEvent = (eventName) => {
+  elementObject.removeEvent = (eventName) => {
     delete events[eventName];
   };
 
-  const _setChildren = (func) => {
+  elementObject._setChildren = (func) => {
     children = func(children);
   };
 
-  const getChildren = () => {
+  elementObject.getChildren = () => {
     return [...children];
-  };
-
-  const elementObject = {
-    el,
-    setEl,
-    setEvent,
-    getEvents,
-    removeEvent,
-    getChildren,
-    _setChildren,
   };
 
   parent._setChildren((prevChildren) => {
     return [...prevChildren, elementObject];
   });
 
+  if (setInput) elementObject.setEl(setInput, setEvents);
+
+  render();
+
   return elementObject;
 };
 
 const createRoot = () => {
+  //initialise root with similar methods as createEl to allow render() to recurse through both
+
+  const rootObject = new Object();
+
   let children = [];
 
-  const _setChildren = (func) => {
+  rootObject._setChildren = (func) => {
     children = func(children);
   };
 
-  const getEvents = () => {
+  rootObject.getEvents = () => {
     return {};
   };
 
-  const getChildren = () => {
+  rootObject.getChildren = () => {
     return [...children];
   };
 
-  const el = document.createElement("div");
-  el.id = "root";
-  return { el, _setChildren, getChildren, getEvents };
+  rootObject.el = document.createElement("div");
+  rootObject.el.id = "root";
+  return rootObject;
 };
 
 const virtualRoot = createRoot();
 
 const render = () => {
+  //recursively append elements to root, attatching any event-listeners set in virtual element
+
   const root = document.getElementById("root");
 
   const renderElement = ({ ...virtualEl }) => {
     const el = virtualEl.el.cloneNode(true);
     const events = virtualEl.getEvents();
-    Object.keys(events).forEach((e) => {
-      el[e] = events[e];
+
+    const eventNames = Object.keys(events);
+    eventNames.forEach((eventName) => {
+      el[eventName] = events[eventName];
     });
+
     const children = virtualEl.getChildren();
+    //recurse over children
     children.forEach((child) => {
       el.append(renderElement(child));
     });
+
     return el;
   };
 
